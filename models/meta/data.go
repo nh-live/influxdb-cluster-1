@@ -12,6 +12,9 @@ type Data struct {
 	Databases []DatabaseInfo
 	DataNode  []NodeInfo
 	MetaNode  []NodeInfo
+
+	//MaxMetaNodeID uint64
+	//MaxDataNodeID uint64
 }
 
 type DatabaseInfo struct {
