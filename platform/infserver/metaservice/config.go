@@ -8,6 +8,7 @@ const (
 )
 
 type Config struct {
+	LocalID             string `toml:"id"`
 	Dir                 string `toml:"dir"`
 	RetentionAutoCreate bool   `toml:"retention-autocreate"`
 	LoggingEnabled      bool   `toml:"logging-enabled"`
