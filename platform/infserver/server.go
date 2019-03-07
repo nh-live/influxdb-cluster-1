@@ -3,26 +3,39 @@ package infserver
 import (
 	"github.com/influxdata/influxdb/models"
 	"github.com/influxdata/influxdb/platform/infserver/metaservice"
+	"github.com/influxdata/influxdb/platform/infserver/metaservice/raft_store"
 	"github.com/influxdata/influxdb/platform/infserver/queryservice"
 	"github.com/influxdata/influxdb/platform/infserver/transervice"
 	"github.com/influxdata/influxdb/platform/infserver/writeservice"
 	"github.com/influxdata/influxdb/query"
+	"github.com/influxdata/influxdb/tcp"
+	"net"
 )
 
 type Server struct {
-	ServerID uint64
+	node   Node
+	nodes  map[string]Node
+	closed chan struct{}
 
+	Listener net.Listener
+
+	Mux      *tcp.Mux
 	MetaSvc  *metaservice.MetaService
 	TranSvc  *transervice.TranService
 	WriteSvc *writeservice.WriteService
 	QuerySvc *queryservice.QueryService
 }
 
-func New() *Server {
-	s := &Server{}
-	s.MetaSvc = metaservice.New()
-	s.TranSvc = transervice.New()
+func New(c *Config) *Server {
+	node := c.Nodes[c.Name]
+	s := &Server{
+		node:   node,
+		closed: make(chan struct{}),
+	}
 
+	s.Mux = tcp.NewMux()
+	s.MetaSvc = metaservice.New(c.Meta, c.Name, c.Nodes, c.Path, s.Mux.Listen(raft_store.MuxHeader))
+	s.TranSvc = transervice.New()
 	s.WriteSvc = writeservice.New(s.MetaSvc, s.TranSvc)
 	s.QuerySvc = queryservice.New()
 	return s

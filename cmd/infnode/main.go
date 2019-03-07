@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"github.com/BurntSushi/toml"
 	"github.com/influxdata/influxdb/platform/infserver"
 	"os"
 )
@@ -10,8 +12,18 @@ const (
 	SERVICENAME = "infnode"
 )
 
+var configPath string
+
+func init() {
+	flag.StringVar(&configPath, "config", "", "config path with raft")
+	flag.Parse()
+}
 func main() {
-	s := infserver.New()
+	c := &infserver.Config{}
+	if _, err := toml.DecodeFile(configPath, &c); err != nil {
+		fmt.Fprintf(os.Stderr, "deocde config file: %s", err)
+	}
+	s := infserver.New(c)
 	if err := s.Open(); err != nil {
 		fmt.Fprintf(os.Stderr, "error open %s", SERVICENAME)
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/raft"
 	"github.com/hashicorp/raft-boltdb"
+	"github.com/influxdata/influxdb/platform/infserver"
 	"io/ioutil"
 	"net"
 	"os"
@@ -12,7 +13,6 @@ import (
 )
 
 type RaftStore struct {
-	c         *Config
 	fsm       raft.FSM
 	LocalID   raft.ServerID
 	LocalAddr raft.ServerAddress
@@ -25,17 +25,17 @@ type RaftStore struct {
 	raft      *raft.Raft
 }
 
-func NewRaftStore(c *Config, fsm raft.FSM, ln net.Listener) *RaftStore {
+func NewRaftStore(localID string, nodes map[string]infserver.Node, path string, fsm raft.FSM, ln net.Listener) *RaftStore {
+	lnode := nodes[localID]
 	return &RaftStore{
-		LocalID:   raft.ServerID(c.LocalID),
-		LocalAddr: raft.ServerAddress(c.LocalAddr),
-		LocalPath: c.LocalPath,
+		LocalID:   raft.ServerID(lnode.Name),
+		LocalAddr: raft.ServerAddress(lnode.RaftAddress),
+		LocalPath: path,
 		fsm:       fsm,
 		ln:        ln,
 	}
 }
-func (rs *RaftStore) Open(ln net.Listener) error {
-	rs.ln = ln
+func (rs *RaftStore) Open() error {
 	config := raft.DefaultConfig()
 	config.LogOutput = ioutil.Discard
 
@@ -59,6 +59,5 @@ func (rs *RaftStore) Open(ln net.Listener) error {
 		return fmt.Errorf("new raft : %s", err)
 	}
 	rs.raft = ra
-	rs.raft.BootstrapCluster()
 	return nil
 }

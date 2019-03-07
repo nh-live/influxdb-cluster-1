@@ -3,6 +3,8 @@ package metaservice
 import (
 	"github.com/influxdata/influxdb/models"
 	"github.com/influxdata/influxdb/models/meta"
+	"github.com/influxdata/influxdb/platform/infserver"
+	"net"
 	"os"
 	"path/filepath"
 	"sync"
@@ -13,24 +15,25 @@ const (
 )
 
 type MetaService struct {
-	mu    sync.RWMutex
-	path  string
-	store Store
+	mu     sync.RWMutex
+	dir    string
+	store  *Store
+	closed chan struct{}
 }
 
-func New(c *Config) *MetaService {
-	return &MetaService{
-		path: c.Dir,
+func New(c *Config, name string, nodes map[string]infserver.Node, path string, ln net.Listener) *MetaService {
+	ms := &MetaService{
+		dir: c.Dir,
 	}
+	ms.store = NewStore(name, nodes, path, ln)
+	return ms
 }
 func (ms *MetaService) Open() error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 
-	if ms.store.cacheData.Index == 1 {
-		if err := snapshot(ms.path, ms.store.cacheData); err != nil {
-			return err
-		}
+	if err := ms.store.Open(); err != nil {
+		return err
 	}
 	return nil
 }

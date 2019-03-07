@@ -1,6 +1,5 @@
 package netserver
 
 type Config struct {
-	Addr string
-	Port uint
+	BindAddress string `toml:bind-address`
 }
