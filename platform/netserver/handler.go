@@ -23,8 +23,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) serveWrite(w http.ResponseWriter, r *http.Request) {
-	err := h.InfService.Write()
+	//err := h.InfService.Write()
+	w.WriteHeader(http.StatusOK)
+	return
 }
 func (h *Handler) serveQuery(w http.ResponseWriter, r *http.Request) {
-	res, err := h.InfService.Query()
+	//res, err := h.InfService.Query()
+	w.WriteHeader(http.StatusOK)
+	return
 }

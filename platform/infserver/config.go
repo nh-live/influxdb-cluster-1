@@ -6,9 +6,9 @@ import (
 )
 
 type Config struct {
-	Name  string              `toml:"name"`
-	Path  string              `toml:"dir"`
-	Nodes map[string]Node     `toml:"nodes"`
-	Meta  *metaservice.Config `toml:"meta"`
-	Httpd *netserver.Config   `toml:"http"`
+	BindAddress string              `toml:"bing-address"`
+	Name        string              `toml:"name"`
+	Nodes       map[string]Node     `toml:"nodes"`
+	Meta        *metaservice.Config `toml:"meta"`
+	Httpd       *netserver.Config   `toml:"http"`
 }

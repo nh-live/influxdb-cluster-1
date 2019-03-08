@@ -24,17 +24,20 @@ type Server struct {
 	TranSvc  *transervice.TranService
 	WriteSvc *writeservice.WriteService
 	QuerySvc *queryservice.QueryService
+
+	bindAddress string
 }
 
 func New(c *Config) *Server {
 	node := c.Nodes[c.Name]
 	s := &Server{
-		node:   node,
-		closed: make(chan struct{}),
+		node:        node,
+		closed:      make(chan struct{}),
+		bindAddress: c.BindAddress,
 	}
 
 	s.Mux = tcp.NewMux()
-	s.MetaSvc = metaservice.New(c.Meta, c.Name, c.Nodes, c.Path, s.Mux.Listen(raft_store.MuxHeader))
+	s.MetaSvc = metaservice.New(c.Meta, c.Name, c.Nodes, s.Mux.Listen(raft_store.MuxHeader))
 	s.TranSvc = transervice.New()
 	s.WriteSvc = writeservice.New(s.MetaSvc, s.TranSvc)
 	s.QuerySvc = queryservice.New()
@@ -42,6 +45,13 @@ func New(c *Config) *Server {
 }
 
 func (s *Server) Open() error {
+
+	ln, err := net.Listen("tcp", s.bindAddress)
+	if err != nil {
+		return err
+	}
+	go s.Mux.Serve(ln)
+
 	if err := s.MetaSvc.Open(); err != nil {
 		return err
 	}

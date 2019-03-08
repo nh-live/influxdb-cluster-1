@@ -1,63 +1,38 @@
 package raft_store
 
 import (
-	"fmt"
 	"github.com/hashicorp/raft"
-	"github.com/hashicorp/raft-boltdb"
+	"github.com/influxdata/influxdb/models/meta"
 	"github.com/influxdata/influxdb/platform/infserver"
-	"io/ioutil"
+	"io"
 	"net"
-	"os"
-	"path/filepath"
-	"time"
+	"sync"
 )
 
 type RaftStore struct {
-	fsm       raft.FSM
-	LocalID   raft.ServerID
-	LocalAddr raft.ServerAddress
-	LocalPath string
-
-	peers     []raft.ServerAddress
-	ln        net.Listener
-	transport *raft.NetworkTransport
-	rstore    *raftboltdb.BoltStore
-	raft      *raft.Raft
+	mu        sync.RWMutex
+	data      *meta.Data
+	raftState *raftState
 }
 
-func NewRaftStore(localID string, nodes map[string]infserver.Node, path string, fsm raft.FSM, ln net.Listener) *RaftStore {
-	lnode := nodes[localID]
+func NewRaftStore(localID string, nodes map[string]infserver.Node, path string, ln net.Listener) *RaftStore {
 	return &RaftStore{
-		LocalID:   raft.ServerID(lnode.Name),
-		LocalAddr: raft.ServerAddress(lnode.RaftAddress),
-		LocalPath: path,
-		fsm:       fsm,
-		ln:        ln,
+		raftState: NewRaftState(localID, nodes, path, ln),
 	}
 }
 func (rs *RaftStore) Open() error {
-	config := raft.DefaultConfig()
-	config.LogOutput = ioutil.Discard
+	rs.mu.Lock()
+	defer rs.mu.Unlock()
 
-	raftlayer := newRaftLayer(rs.LocalAddr, rs.ln)
+	return rs.raftState.open(rs)
+}
+func (rs *RaftStore) Apply(log *raft.Log) interface{} {
+	return nil
+}
 
-	rs.transport = raft.NewNetworkTransport(raftlayer, 3, 10*time.Second, config.LogOutput)
-
-	store, err := raftboltdb.NewBoltStore(filepath.Join(rs.LocalPath, "raft.db"))
-	if err != nil {
-		return fmt.Errorf("new bolt store : %s", err)
-	}
-	rs.rstore = store
-
-	snapshots, err := raft.NewFileSnapshotStore(rs.LocalPath, 2, os.Stderr)
-	if err != nil {
-		return fmt.Errorf("file snapshot store: %s", err)
-	}
-
-	ra, err := raft.NewRaft(config, rs.fsm, store, store, snapshots, rs.transport)
-	if err != nil {
-		return fmt.Errorf("new raft : %s", err)
-	}
-	rs.raft = ra
+func (rs *RaftStore) Snapshot() (raft.FSMSnapshot, error) {
+	return nil, nil
+}
+func (rs *RaftStore) Restore(ir io.ReadCloser) error {
 	return nil
 }

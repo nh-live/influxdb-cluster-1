@@ -21,11 +21,11 @@ type MetaService struct {
 	closed chan struct{}
 }
 
-func New(c *Config, name string, nodes map[string]infserver.Node, path string, ln net.Listener) *MetaService {
+func New(c *Config, name string, nodes map[string]infserver.Node, ln net.Listener) *MetaService {
 	ms := &MetaService{
 		dir: c.Dir,
 	}
-	ms.store = NewStore(name, nodes, path, ln)
+	ms.store = NewStore(name, nodes, ms.dir, ln)
 	return ms
 }
 func (ms *MetaService) Open() error {
