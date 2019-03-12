@@ -30,11 +30,15 @@ func (ws *WriteService) Open() error {
 
 func (ws *WriteService) writeToShard(sid uint64, pts models.Points) error {
 	dnsID, err := ws.MetaService.GetDnsIDBySID(sid)
+	if err != nil {
+		return err
+	}
 	for _, dn := range dnsID {
 		//TODO 高可用考虑是否重写，以及是否可以重写，若不可重写，如何保证一致性
-		err := ws.Transmitter.WriteToDataNode(dn, pts)
+		if err := ws.Transmitter.WriteToDataNode(dn, pts); err != nil {
+			return err
+		}
 	}
-
 	return err
 }
 

@@ -4,6 +4,7 @@ import (
 	"github.com/influxdata/influxdb/models"
 	"github.com/influxdata/influxdb/query"
 	"net/http"
+	"strings"
 )
 
 type Handler struct {
@@ -19,6 +20,19 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.serveWrite(w, r)
 	case "query":
 		h.serveQuery(w, r)
+	case "test":
+
+	}
+}
+
+func (h *Handler) serveTest(w http.ResponseWriter, r *http.Request) {
+	if strings.HasPrefix(r.URL.String(), "/raft") {
+		if r.Method == "POST" {
+			r.Header.Get("dataID")
+		}
+		if r.Method == "GET" {
+
+		}
 	}
 }
 

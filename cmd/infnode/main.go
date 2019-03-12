@@ -6,6 +6,8 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/influxdata/influxdb/platform/infserver"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 const (
@@ -25,6 +27,12 @@ func main() {
 	}
 	s := infserver.New(c)
 	if err := s.Open(); err != nil {
-		fmt.Fprintf(os.Stderr, "error open %s", SERVICENAME)
+		fmt.Fprintf(os.Stderr, "error open %s:%s", SERVICENAME, err)
+	}
+
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM)
+	select {
+	case <-signalCh:
 	}
 }

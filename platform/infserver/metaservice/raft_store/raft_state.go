@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/raft"
 	"github.com/hashicorp/raft-boltdb"
-	"github.com/influxdata/influxdb/platform/infserver"
-	"io/ioutil"
+	"github.com/influxdata/influxdb"
 	"net"
 	"os"
 	"path/filepath"
@@ -23,27 +22,36 @@ type raftState struct {
 	rstore    *raftboltdb.BoltStore
 
 	// TODO raft启动完成后需要校验该信息
-	servers []raft.ServerAddress
+	servers []raft.Server
 }
 
-func NewRaftState(localID string, nodes map[string]infserver.Node, path string, ln net.Listener) *raftState {
+func NewRaftState(localID string, nodes map[string]influxdb.Node, path string, ln net.Listener) *raftState {
 	//lnode := nodes[localID]
-	return &raftState{
+	rs := &raftState{
 		LocalID:   raft.ServerID(localID),
 		LocalAddr: raft.ServerAddress(nodes[localID].RaftAddress),
 		LocalPath: path,
+		ln:        ln,
 	}
+	for _, v := range nodes {
+		rs.servers = append(rs.servers, raft.Server{
+			ID:      raft.ServerID(v.Name),
+			Address: raft.ServerAddress(v.RaftAddress),
+		})
+	}
+	return rs
 }
 
 func (rs *raftState) open(fsm raft.FSM) error {
 	config := raft.DefaultConfig()
-	config.LogOutput = ioutil.Discard
+	//config.LogOutput = ioutil.Discard
+	config.LocalID = rs.LocalID
 
 	raftlayer := newRaftLayer(rs.LocalAddr, rs.ln)
 
 	rs.transport = raft.NewNetworkTransport(raftlayer, 3, 10*time.Second, config.LogOutput)
 
-	store, err := raftboltdb.NewBoltStore(filepath.Join(rs.LocalPath, "raft.db"))
+	store, err := raftboltdb.NewBoltStore(filepath.Join(rs.LocalPath, metaFile))
 	if err != nil {
 		return fmt.Errorf("new bolt store : %s", err)
 	}
@@ -59,5 +67,10 @@ func (rs *raftState) open(fsm raft.FSM) error {
 		return fmt.Errorf("new raft : %s", err)
 	}
 	rs.raft = ra
+	if future := rs.raft.BootstrapCluster(raft.Configuration{
+		Servers: rs.servers,
+	}); future != nil {
+		return err
+	}
 	return nil
 }

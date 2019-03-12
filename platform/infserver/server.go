@@ -1,6 +1,7 @@
 package infserver
 
 import (
+	"github.com/influxdata/influxdb"
 	"github.com/influxdata/influxdb/models"
 	"github.com/influxdata/influxdb/platform/infserver/metaservice"
 	"github.com/influxdata/influxdb/platform/infserver/metaservice/raft_store"
@@ -13,8 +14,8 @@ import (
 )
 
 type Server struct {
-	node   Node
-	nodes  map[string]Node
+	node   influxdb.Node
+	nodes  map[string]influxdb.Node
 	closed chan struct{}
 
 	Listener net.Listener

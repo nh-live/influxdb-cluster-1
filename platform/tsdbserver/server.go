@@ -7,16 +7,15 @@ type Server struct {
 	store    *tsdb.Store
 }
 
-func New() *Server {
+func New(c *Config) *Server {
 	s := &Server{}
-	s.store = tsdb.NewStore()
-	tsdb.NewStore()
-	return &Server{}
+	s.store = tsdb.NewStore(c.dir)
+	return s
 }
 func (s *Server) Open() error {
 	s.store.Open()
 	return nil
 }
 func (s *Server) Close() error {
-	return nil
+	return s.store.Close()
 }
