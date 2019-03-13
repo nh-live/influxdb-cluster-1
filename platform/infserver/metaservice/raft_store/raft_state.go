@@ -25,7 +25,7 @@ type raftState struct {
 	servers []raft.Server
 }
 
-func NewRaftState(localID string, nodes map[string]influxdb.Node, path string, ln net.Listener) *raftState {
+func NewRaftState(localID string, nodes map[string]influxdb.MetaNode, path string, ln net.Listener) *raftState {
 	//lnode := nodes[localID]
 	rs := &raftState{
 		LocalID:   raft.ServerID(localID),

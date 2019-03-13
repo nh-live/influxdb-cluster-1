@@ -3,7 +3,7 @@ package infserver
 import (
 	"github.com/influxdata/influxdb"
 	"github.com/influxdata/influxdb/platform/infserver/metaservice"
-	"github.com/influxdata/influxdb/platform/netserver"
+	"github.com/influxdata/influxdb/platform/infserver/netservice"
 )
 
 type Config struct {
@@ -11,5 +11,5 @@ type Config struct {
 	Name        string                       `toml:"name"`
 	Nodes       map[string]influxdb.MetaNode `toml:"nodes"`
 	Meta        *metaservice.Config          `toml:"meta"`
-	Httpd       *netserver.Config            `toml:"http"`
+	Httpd       *netservice.Config           `toml:"http"`
 }

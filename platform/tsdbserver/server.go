@@ -3,8 +3,9 @@ package tsdbserver
 import "github.com/influxdata/influxdb/tsdb"
 
 type Server struct {
-	ServerID uint64
-	store    *tsdb.Store
+	name  string
+	dir   string
+	store *tsdb.Store
 }
 
 func New(c *Config) *Server {

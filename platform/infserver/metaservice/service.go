@@ -14,7 +14,7 @@ type MetaService struct {
 	closed chan struct{}
 }
 
-func New(c *Config, name string, nodes map[string]influxdb.Node, ln net.Listener) *MetaService {
+func New(c *Config, name string, nodes map[string]influxdb.MetaNode, ln net.Listener) *MetaService {
 	ms := &MetaService{
 		dir: c.Dir,
 	}

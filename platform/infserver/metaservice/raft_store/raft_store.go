@@ -19,7 +19,7 @@ type RaftStore struct {
 	raftState *raftState
 }
 
-func NewRaftStore(localID string, nodes map[string]influxdb.Node, path string, ln net.Listener) *RaftStore {
+func NewRaftStore(localID string, nodes map[string]influxdb.MetaNode, path string, ln net.Listener) *RaftStore {
 	return &RaftStore{
 		raftState: NewRaftState(localID, nodes, path, ln),
 	}

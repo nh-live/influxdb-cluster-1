@@ -21,7 +21,7 @@ type Store struct {
 	closed chan struct{}
 }
 
-func NewStore(localID string, nodes map[string]influxdb.Node, path string, ln net.Listener) *Store {
+func NewStore(localID string, nodes map[string]influxdb.MetaNode, path string, ln net.Listener) *Store {
 	s := &Store{
 		dir:     path,
 		changed: make(chan struct{}),

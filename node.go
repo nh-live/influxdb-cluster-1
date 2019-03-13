@@ -7,7 +7,6 @@ type MetaNode struct {
 
 type DataNode struct {
 	Name        string `toml:"name"`
-	Dir         string `toml:"dir"`
 	BindAddress string `toml:"bind-address"`
-	RegAddress  string `toml:"register-bind-address"`
+	RegAddress  string `toml:"register-address"`
 }

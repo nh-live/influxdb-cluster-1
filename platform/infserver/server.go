@@ -14,8 +14,8 @@ import (
 )
 
 type Server struct {
-	node   influxdb.Node
-	nodes  map[string]influxdb.Node
+	node   influxdb.MetaNode
+	nodes  map[string]influxdb.MetaNode
 	closed chan struct{}
 
 	Listener net.Listener

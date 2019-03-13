@@ -1,6 +1,7 @@
-package netserver
+package netservice
 
 import (
+	"encoding/json"
 	"github.com/influxdata/influxdb/models"
 	"github.com/influxdata/influxdb/query"
 	"net/http"
@@ -38,11 +39,17 @@ func (h *Handler) serveTest(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) serveWrite(w http.ResponseWriter, r *http.Request) {
 	//err := h.InfService.Write()
-	w.WriteHeader(http.StatusOK)
+
 	return
 }
 func (h *Handler) serveQuery(w http.ResponseWriter, r *http.Request) {
 	//res, err := h.InfService.Query()
 	w.WriteHeader(http.StatusOK)
 	return
+}
+
+func resultError(w http.ResponseWriter, result query.Result, code int) {
+	w.Header().Add("content-type", "application/json")
+	w.WriteHeader(code)
+	_ = json.NewEncoder(w).Encode(&result)
 }
