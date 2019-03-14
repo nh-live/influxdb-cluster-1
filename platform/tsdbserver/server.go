@@ -1,11 +1,18 @@
 package tsdbserver
 
-import "github.com/influxdata/influxdb/tsdb"
+import (
+	"github.com/influxdata/influxdb/rpc"
+	"github.com/influxdata/influxdb/tsdb"
+	"net"
+)
 
 type Server struct {
-	name  string
-	dir   string
-	store *tsdb.Store
+	name   string
+	dir    string
+	store  *tsdb.Store
+	rpcSvc *rpc.Service
+
+	ln net.Listener
 }
 
 func New(c *Config) *Server {

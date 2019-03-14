@@ -10,7 +10,7 @@ type MetaService interface {
 }
 
 type Transmitter interface {
-	WriteToDataNode(dnID uint64, pts models.Points) error
+	WriteToDataNode(dnID uint64, sID uint64, pts models.Points) error
 }
 type WriteService struct {
 	MetaService MetaService
@@ -35,7 +35,7 @@ func (ws *WriteService) writeToShard(sid uint64, pts models.Points) error {
 	}
 	for _, dn := range dnsID {
 		//TODO 高可用考虑是否重写，以及是否可以重写，若不可重写，如何保证一致性
-		if err := ws.Transmitter.WriteToDataNode(dn, pts); err != nil {
+		if err := ws.Transmitter.WriteToDataNode(dn, sid, pts); err != nil {
 			return err
 		}
 	}

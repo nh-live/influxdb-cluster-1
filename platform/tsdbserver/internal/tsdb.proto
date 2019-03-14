@@ -1,0 +1,13 @@
+syntax = "proto3";
+package internal;
+
+service TsdbRPC {
+    rpc WritePoints(WritePointsRequest) returns (WritePointsReply){}
+}
+message WritePointsRequest {
+    uint64 shardID = 1;
+    bytes points = 2;
+}
+message WritePointsReply {
+    string err = 1;
+}
