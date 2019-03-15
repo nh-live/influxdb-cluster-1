@@ -1,6 +1,10 @@
 package transervice
 
-import "github.com/influxdata/influxdb/models"
+import (
+	"github.com/influxdata/influxdb/models"
+	pb "github.com/influxdata/influxdb/rpc/tsdb"
+	"google.golang.org/grpc"
+)
 
 type TranService struct {
 }
@@ -13,6 +17,8 @@ func (ts *TranService) Open() error {
 	return nil
 }
 
-func (ts *TranService) WriteToDataNode(dnID uint64, pts models.Points) error {
+func (ts *TranService) WriteToDataNode(dnID uint64, sID uint64, pts models.Points) error {
+	conn := grpc.Dial()
+	pb.NewTsdbRPCClient(conn).WritePoints()
 	return nil
 }

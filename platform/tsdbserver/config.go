@@ -1,5 +1,8 @@
 package tsdbserver
 
+import "github.com/influxdata/influxdb/platform/tsdbserver/rpcservice"
+
 type Config struct {
-	dir string
+	Path string             `toml:"dir"`
+	Rpc  *rpcservice.Config `toml:"rpc"`
 }
